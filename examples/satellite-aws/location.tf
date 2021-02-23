@@ -9,4 +9,7 @@ module "satellite-location" {
   endpoint          = "cloud.ibm.com"
   resource_group    = var.resource_group
   host_provider     = "aws"
+  zone1             = data.aws_availability_zones.available.names[0]
+  zone2             = data.aws_availability_zones.available.names[1]
+  zone3             = data.aws_availability_zones.available.names[2]
 }

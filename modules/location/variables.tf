@@ -53,3 +53,19 @@ variable "endpoint" {
     type         = string
     default      = "cloud.ibm.com"
 }
+
+variable "zone1" {
+    description  = "Zone 1 "
+    type         = string
+    default      = "zone-1"
+}
+variable "zone2" {
+    description  = "Zone 2 "
+    type         = string
+    default      = "zone-2"
+}
+variable "zone3" {
+    description  = "Zone 3 "
+    type         = string
+    default      = "zone-3"
+}

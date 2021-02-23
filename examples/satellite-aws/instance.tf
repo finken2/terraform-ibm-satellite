@@ -1,10 +1,4 @@
-data "aws_vpc" "default" {
-  default = true
-}
 
-data "aws_subnet_ids" "all" {
-  vpc_id = data.aws_vpc.default.id
-}
 
 data "aws_ami" "redhat_linux" {
   owners = ["309956199498"]
@@ -18,13 +12,13 @@ data "aws_ami" "redhat_linux" {
   }
 }
 
-module "security_group" {
+module "satellite_security_group" {
   source      = "terraform-aws-modules/security-group/aws"
   version     = "~> 3.0"
 
   name        = "${var.resource_prefix}-satellite-security"
   description = "Security group for satellite usage with EC2 instance"
-  vpc_id      = data.aws_vpc.default.id
+  vpc_id      = module.vpc.vpc_id
 
   ingress_with_cidr_blocks    = [
     {
@@ -53,36 +47,7 @@ module "security_group" {
       description = "HTTP TCP"
       cidr_blocks = "0.0.0.0/0"
     },
-    {
-      from_port   = 0
-      to_port     = 0
-      protocol    = "-1"
-      description = "All traffic"
-      cidr_blocks = "0.0.0.0/0"
-    },
   ]
-
-  ingress_with_ipv6_cidr_blocks   = [
-    {
-      from_port        = 30000
-      to_port          = 32767
-      protocol         = "udp"
-      ipv6_cidr_blocks = "::/0"
-    },
-    {
-      from_port        = 30000
-      to_port          = 32767
-      protocol         = "tcp"
-      ipv6_cidr_blocks = "::/0"
-    },
-    {
-      from_port        = 443
-      to_port          = 443
-      protocol         = "tcp"
-      description      = "HTTPS TCP"
-      ipv6_cidr_blocks = "::/0"
-    },
-  ] 
 
   egress_with_cidr_blocks = [
     {
@@ -94,21 +59,24 @@ module "security_group" {
     },
   ]
 
-  egress_with_ipv6_cidr_blocks = [
+  ingress_with_self = [
+    {
+      rule = "all-all"
+    },
     {
       from_port   = 0
       to_port     = 0
       protocol    = "-1"
-      description = "All traffic - ipv6"
-      ipv6_cidr_blocks = "::/0"
+      description = "Ingress with self"
+      self        = true
     },
   ]
 
 }
 
-resource "aws_placement_group" "web" {
+resource "aws_placement_group" "satellite-group" {
   name     = "${var.resource_prefix}-hunky-dory-pg"
-  strategy = "cluster"
+  strategy = "spread"
 }
 
 resource "tls_private_key" "example" {
@@ -134,10 +102,9 @@ module "ec2" {
   ami                         = data.aws_ami.redhat_linux.id
   instance_type               = var.instance_type
   key_name                    = aws_key_pair.keypair.key_name
-  subnet_id                   = tolist(data.aws_subnet_ids.all.ids)[0]
-  vpc_security_group_ids      = [module.security_group.this_security_group_id]
+  subnet_ids                  = module.vpc.public_subnets
+  vpc_security_group_ids      = [module.satellite_security_group.this_security_group_id]
   associate_public_ip_address = true
-  placement_group             = aws_placement_group.web.id
+  placement_group             = aws_placement_group.satellite-group.id
   user_data                   = file(replace("/tmp/.schematics/addhost.sh*${aws_key_pair.keypair.id}", "/[*].*/", ""))
-
 }

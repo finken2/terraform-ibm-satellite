@@ -22,6 +22,9 @@ resource "null_resource" "satellite_location" {
       RESOURCE_GROUP = var.resource_group
       PROVIDER       = var.host_provider
       ENDPOINT       = "cloud.ibm.com"
+      ZONE1          = var.zone1
+      ZONE2          = var.zone2
+      ZONE3          = var.zone3
     }
   }
 
