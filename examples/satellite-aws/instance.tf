@@ -91,7 +91,7 @@ resource "tls_private_key" "example" {
 resource "aws_key_pair" "keypair" {
   depends_on = [ module.satellite-location ]
 
-  key_name    = "${lvar.location_name}-ssh"
+  key_name    = "${var.location_name}-ssh"
   public_key  = var.ssh_public_key != "" ? var.ssh_public_key : tls_private_key.example.public_key_openssh
 
   tags = {
