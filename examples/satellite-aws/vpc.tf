@@ -9,7 +9,7 @@ data "aws_availability_zones" "available" {
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
 
-  name = "${var.resource_prefix}-vpc"
+  name = "${local.resource_prefix}-vpc"
 
   cidr = "10.0.0.0/16"
 
@@ -22,16 +22,15 @@ module "vpc" {
   single_nat_gateway = true
 
   public_subnet_tags = {
-    Name = "ibm-cloud-satellite-public"
+    Name = local.resource_prefix
   }
 
   tags = {
-    Owner       = "user"
-    Environment = "dev"
+    ibm-satellite = var.location_name
   }
 
   vpc_tags = {
-    Name = "ibm-cloud-satellite"
+    Name = local.resource_prefix
   }
 }
 

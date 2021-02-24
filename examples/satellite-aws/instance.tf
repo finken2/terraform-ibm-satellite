@@ -12,13 +12,17 @@ data "aws_ami" "redhat_linux" {
   }
 }
 
-module "satellite_security_group" {
+module "security_group" {
   source      = "terraform-aws-modules/security-group/aws"
   version     = "~> 3.0"
 
-  name        = "${var.resource_prefix}-satellite-security"
+  name        = "${local.resource_prefix}-sg"
   description = "Security group for satellite usage with EC2 instance"
   vpc_id      = module.vpc.vpc_id
+
+  tags = {
+    ibm-satellite = var.location_name
+  }
 
   ingress_with_cidr_blocks    = [
     {
@@ -58,25 +62,25 @@ module "satellite_security_group" {
       cidr_blocks = "0.0.0.0/0"
     },
   ]
-
   ingress_with_self = [
     {
-      rule = "all-all"
-    },
-    {
-      from_port   = 0
-      to_port     = 0
-      protocol    = "-1"
-      description = "Ingress with self"
-      self        = true
+      from_port = 0
+      to_port = 0
+      protocol = -1
+      self = true
     },
   ]
 
 }
 
 resource "aws_placement_group" "satellite-group" {
-  name     = "${var.resource_prefix}-hunky-dory-pg"
+  name     = "${local.resource_prefix}-pg"
   strategy = "spread"
+
+  tags = {
+    ibm-satellite = var.location_name
+  }
+
 }
 
 resource "tls_private_key" "example" {
@@ -87,8 +91,13 @@ resource "tls_private_key" "example" {
 resource "aws_key_pair" "keypair" {
   depends_on = [ module.satellite-location ]
 
-  key_name    = "${var.resource_prefix}-ssh"
+  key_name    = "${local.resource_prefix}-ssh"
   public_key  = var.ssh_public_key != "" ? var.ssh_public_key : tls_private_key.example.public_key_openssh
+
+  tags = {
+    ibm-satellite = var.location_name
+  }
+
 }
 
 
@@ -97,14 +106,19 @@ module "ec2" {
   
   depends_on                  = [ module.satellite-location ]
   instance_count              = var.satellite_host_count + var.addl_host_count
-  name                        = "${var.resource_prefix}-host"
+  name                        = "${local.resource_prefix}-host"
   use_num_suffix              = true
   ami                         = data.aws_ami.redhat_linux.id
   instance_type               = var.instance_type
   key_name                    = aws_key_pair.keypair.key_name
   subnet_ids                  = module.vpc.public_subnets
-  vpc_security_group_ids      = [module.satellite_security_group.this_security_group_id]
+  vpc_security_group_ids      = [module.security_group.this_security_group_id]
   associate_public_ip_address = true
   placement_group             = aws_placement_group.satellite-group.id
   user_data                   = file(replace("/tmp/.schematics/addhost.sh*${aws_key_pair.keypair.id}", "/[*].*/", ""))
+
+  tags = {
+    ibm-satellite = var.location_name
+  }
+
 }

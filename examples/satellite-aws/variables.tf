@@ -12,11 +12,13 @@ variable "ibmcloud_api_key" {
 variable "aws_access_key" {
   description  = "AWS access key"
   type         = string
+  sensitive   = true
 }
 
 variable "aws_secret_key" {
   description  = "AWS secret key"
   type         = string
+  sensitive   = true
 }
 
 variable "ibm_region" {
@@ -50,7 +52,7 @@ variable "resource_group" {
 
 variable "location_name" {
   description = "Location Name"
-  default     = "satellite-aws"
+  default     = "satellite-aws-14"
 
   validation {
     condition     = var.location_name != "" && length(var.location_name) <= 32
@@ -89,7 +91,7 @@ variable "instance_type" {
   default        = "m5d.xlarge"
 
   validation {
-    condition     = var.instance_type == "m5d.xlarge" || var.instance_type == "m5d.2xlarge" || var.instance_type == "m5d.4xlarge""
+    condition     = var.instance_type == "m5d.xlarge" || var.instance_type == "m5d.2xlarge" || var.instance_type == "m5d.4xlarge"
     error_message = "Sorry, satellite only accepts m5d.2xlarge or m5d.4xlarge as instance type."
   }
 }
@@ -98,14 +100,9 @@ variable "ssh_public_key" {
   description = "SSH Public Key. Get your ssh key by running `ssh-key-gen` command"
   type        = string
   default     = ""
+}
 
-variable "resource_prefix" {
-  description = "Name to be used on all aws resource as prefix"
-  type        = string
-  default     = "satellite-aws"
 
-  validation {
-    condition     = var.resource_prefix != "" && length(var.resource_prefix) <= 25
-    error_message = "Sorry, please provide value for vm_prefix variable or check the length of vm_prefix it should be less than 25 chars."
-  }
+locals {
+    resource_prefix = format("%s%s","satellite-",formatdate("YYYYMMDDHHmm", timestamp()))
 }
