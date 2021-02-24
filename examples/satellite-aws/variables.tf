@@ -50,7 +50,7 @@ variable "resource_group" {
 
 variable "location_name" {
   description = "Location Name"
-  default     = "satellite-aws-14"
+  default     = "satellite-aws"
 
   validation {
     condition     = var.location_name != "" && length(var.location_name) <= 32
