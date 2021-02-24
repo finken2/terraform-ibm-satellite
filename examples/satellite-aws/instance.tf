@@ -16,7 +16,7 @@ module "security_group" {
   source      = "terraform-aws-modules/security-group/aws"
   version     = "~> 3.0"
 
-  name        = "${local.resource_prefix}-sg"
+  name        = "${var.location_name}-sg"
   description = "Security group for satellite usage with EC2 instance"
   vpc_id      = module.vpc.vpc_id
 
@@ -74,7 +74,7 @@ module "security_group" {
 }
 
 resource "aws_placement_group" "satellite-group" {
-  name     = "${local.resource_prefix}-pg"
+  name     = "${var.location_name}-pg"
   strategy = "spread"
 
   tags = {
@@ -91,7 +91,7 @@ resource "tls_private_key" "example" {
 resource "aws_key_pair" "keypair" {
   depends_on = [ module.satellite-location ]
 
-  key_name    = "${local.resource_prefix}-ssh"
+  key_name    = "${lvar.location_name}-ssh"
   public_key  = var.ssh_public_key != "" ? var.ssh_public_key : tls_private_key.example.public_key_openssh
 
   tags = {
@@ -106,7 +106,7 @@ module "ec2" {
   
   depends_on                  = [ module.satellite-location ]
   instance_count              = var.satellite_host_count + var.addl_host_count
-  name                        = "${local.resource_prefix}-host"
+  name                        = "${var.location_name}-host"
   use_num_suffix              = true
   ami                         = data.aws_ami.redhat_linux.id
   instance_type               = var.instance_type

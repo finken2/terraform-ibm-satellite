@@ -99,8 +99,3 @@ variable "ssh_public_key" {
   type        = string
   default     = ""
 }
-
-
-locals {
-    resource_prefix = format("%s%s","satellite-",formatdate("YYYYMMDDHHmm", timestamp()))
-}

@@ -9,7 +9,7 @@ data "aws_availability_zones" "available" {
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
 
-  name = "${local.resource_prefix}-vpc"
+  name = "${var.location_name}-vpc"
 
   cidr = "10.0.0.0/16"
 
@@ -22,7 +22,7 @@ module "vpc" {
   single_nat_gateway = true
 
   public_subnet_tags = {
-    Name = local.resource_prefix
+    Name = var.location_name
   }
 
   tags = {
@@ -30,7 +30,7 @@ module "vpc" {
   }
 
   vpc_tags = {
-    Name = local.resource_prefix
+    Name = var.location_name
   }
 }
 
