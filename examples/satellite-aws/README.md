@@ -125,7 +125,6 @@ module "satellite-host" {
 | addl_host_count                       | The total number of additional aws host                            | number   | 0 |  yes     |
 | instance_type                         | The type of aws instance to start, satellite only accepts `m5d.2xlarge` or `m5d.4xlarge` as instance type.                                   | string   | m5d.2xlarge     | yes |
 | ssh_public_key                        | SSH Public Key. Get your ssh key by running `ssh-key-gen` command | string   | n/a     | no |
-| resource_prefix                       | Name to be used on all aws resources as prefix                        | string   | satellite-aws     | yes |
 
 ## Outputs
 

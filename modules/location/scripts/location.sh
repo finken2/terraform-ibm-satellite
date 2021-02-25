@@ -26,11 +26,11 @@ out=$(ibmcloud sat location get --location $LOCATION 2>&1 | grep 'ID:')
 if [[ $out != "" && $out != *"Incident"* ]]; then
   echo "*************  Using location ID for operations *************"
 else
-  ibmcloud sat location create --managed-from $ZONE --name $LOCATION
+  ibmcloud sat location create --managed-from $ZONE --name $LOCATION --ha-zone $ZONE1 --ha-zone $ZONE2 --ha-zone $ZONE3
   if [[ $? != 0 ]]; then
     exit 1
   fi
-  sleep 200
+  sleep 60
   #Get satellite location ID
   loc_id=$(ibmcloud sat location ls 2>&1 | grep -m 1 $LOCATION | awk '{print $2}')
   if [[ $loc_id != "" ]]; then
@@ -44,7 +44,7 @@ n=0
 path_out=""
 until [ "$n" -ge 5 ]
 do
-   path_out=`ibmcloud sat host attach --location $LOCATION -l $LABEL` && break
+   path_out=`ibmcloud sat host attach --location $LOCATION --hl $LABEL` && break
    echo "************* Failed with $n, waiting to retry *****************"
    n=$((n+1))
    sleep 10
@@ -65,4 +65,6 @@ then
 elif [[ $PROVIDER == "aws" ]];
 then
   awk '1;/API_URL=/{ print "yum update -y"; print "yum-config-manager --enable \x27*\x27"; print "yum repolist all"; print "yum install container-selinux -y";}' $path  > /tmp/.schematics/addhost.sh
+  awk '1;/CONTROLLER_ID=/{ print "ZONE=`curl http://169.254.169.254/latest/meta-data/placement/availability-zone`";}' /tmp/.schematics/addhost.sh > tmp && mv tmp /tmp/.schematics/addhost.sh
+  sed 's/SELECTOR_LABELS='\''{/SELECTOR_LABELS='\''{"zone":"'\'''\$ZONE''\''",/' /tmp/.schematics/addhost.sh > tmp && mv tmp /tmp/.schematics/addhost.sh
 fi
