@@ -50,6 +50,16 @@ variable "resource_group" {
   }
 }
 
+variable "environment" {
+  description = "Enter `prod` or `stage` value to run satellite templates on respective environment"
+  default     = "prod"
+
+  validation {
+    condition     = var.environment == "prod" || var.environment == "stage"
+    error_message = "Sorry, please provide correct value for environment variable."
+  }
+}
+
 ##################################################
 # IBMCLOUD Satellite Location Variables
 ##################################################
