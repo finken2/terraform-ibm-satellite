@@ -9,11 +9,11 @@ data "aws_availability_zones" "available" {
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
 
-  name = "${var.location_name}-vpc"
+  name = "${var.resource_prefix}-vpc"
 
   cidr = "10.0.0.0/16"
 
-  azs             = [data.aws_availability_zones.available.names[0], data.aws_availability_zones.available.names[1], data.aws_availability_zones.available.names[2]]
+  azs             = [var.zone1, var.zone2, var.zone3]
   public_subnets = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
 
   enable_ipv6 = true
@@ -22,15 +22,15 @@ module "vpc" {
   single_nat_gateway = true
 
   public_subnet_tags = {
-    Name = var.location_name
+    Name = var.resource_prefix
   }
 
   tags = {
-    ibm-satellite = var.location_name
+    ibm-satellite = var.resource_prefix
   }
 
   vpc_tags = {
-    Name = var.location_name
+    Name = var.resource_prefix
   }
 }
 

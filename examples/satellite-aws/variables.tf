@@ -99,3 +99,31 @@ variable "ssh_public_key" {
   type        = string
   default     = ""
 }
+
+variable "resource_prefix" {
+  description = "Prefix to be prepended to all cloud resources."
+  type        = string
+  default     = "satellite-aws"
+
+  validation {
+    condition     = var.resource_prefix != "" && length(var.resource_prefix) <= 32
+    error_message = "Sorry, please provide value for resource_prefix variable or check the length of name it should be less than 32 chars."
+  }
+
+}
+
+variable "zone1" {
+    description  = "Zone 1 "
+    type         = string
+    default      = ""
+}
+variable "zone2" {
+    description  = "Zone 2 "
+    type         = string
+    default      = ""
+}
+variable "zone3" {
+    description  = "Zone 3 "
+    type         = string
+    default      = ""
+}
