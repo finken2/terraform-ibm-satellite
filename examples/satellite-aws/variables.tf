@@ -76,7 +76,7 @@ variable "location_name" {
 
 variable "location_label" {
   description = "Label to create location"
-  default     = "env=prod"
+  default     = "env=aws"
 }
 
 
