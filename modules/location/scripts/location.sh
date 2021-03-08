@@ -17,14 +17,14 @@ fi
 echo Location= $LOCATION
 out=$(ibmcloud sat location ls | grep -m 1 $LOCATION |  cut -d' ' -f1)
 if [[ $out != "" && $out == $LOCATION ]]; then
- echo "************* satellite location already exist *****************"
+ echo "************* satellite location already exist. Please provide new name or existing location ID as input to 'location_name' parameter and re-try. *****************"
  exit 1
 fi
 
 #Create new location or Use existing location ID
 out=$(ibmcloud sat location get --location $LOCATION 2>&1 | grep 'ID:')
 if [[ $out != "" && $out != *"Incident"* ]]; then
-  echo "*************  Using location ID for operations *************"
+  echo "*************  Uses existing location ID for operations *************"
 else
   ibmcloud sat location create --managed-from $ZONE --name $LOCATION --ha-zone $ZONE1 --ha-zone $ZONE2 --ha-zone $ZONE3
   if [[ $? != 0 ]]; then
@@ -38,13 +38,23 @@ else
   fi
 fi
 
+#Create /tmp/.schematics directory
+script_dir="/tmp/.schematics"
+if [ ! -d "$script_dir" ]; then
+  mkdir -p $script_dir
+  if [[ $? != 0 ]]; then
+    echo "*************  '$script_dir' directory creation failed. *************"
+    exit 1
+  fi
+fi
+
 # Generate attach host script
 echo location= $LOCATION
 n=0
 path_out=""
 until [ "$n" -ge 5 ]
 do
-   path_out=`ibmcloud sat host attach --location $LOCATION --hl $LABEL` && break
+   path_out=`ibmcloud sat host attach --location $LOCATION -hl $LABEL` && break
    echo "************* Failed with $n, waiting to retry *****************"
    n=$((n+1))
    sleep 10

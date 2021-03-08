@@ -25,6 +25,12 @@ variable "aws_secret_key" {
   type         = string
 }
 
+variable "aws_region" {
+  description  = "AWS region"
+  type         = string
+  default      = "us-east-1"
+}
+
 variable "ibm_region" {
   description = "Region of the IBM Cloud account. Currently supported regions for satellite are `us-east` and `eu-gb` region."
   default     = "us-east"
@@ -33,12 +39,6 @@ variable "ibm_region" {
     condition     = var.ibm_region == "us-east" || var.ibm_region == "eu-gb"
     error_message = "Sorry, satellite only accepts us-east or eu-gb region."
   }
-}
-
-variable "aws_region" {
-  description  = "AWS region"
-  type         = string
-  default      = "us-west-2"
 }
 
 variable "resource_group" {
@@ -122,8 +122,8 @@ variable "resource_prefix" {
   default     = "satellite-aws"
 
   validation {
-    condition     = var.resource_prefix != "" && length(var.resource_prefix) <= 32
-    error_message = "Sorry, please provide value for resource_prefix variable or check the length of name it should be less than 32 chars."
+    condition     = var.resource_prefix != "" && length(var.resource_prefix) <= 25
+    error_message = "Sorry, please provide value for resource_prefix variable or check the length of resource_prefix it should be less than 25 chars."
   }
 
 }
